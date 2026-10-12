@@ -8,6 +8,11 @@ def sme():
     return unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
 
 
+def collision_prims(mesh):
+    """Boxes/spheres/capsules + convex hulls. get_simple_collision_count alone ignores convex hulls."""
+    return sme().get_simple_collision_count(mesh) + sme().get_convex_collision_count(mesh)
+
+
 def in_paths(path, prefixes):
     return any(path.startswith(p) for p in prefixes)
 
@@ -70,7 +75,7 @@ class CollisionCheck(MeshCheck):
 
     def run(self, ad, mesh, cfg):
         m = cfg["meshes"]
-        if not m["require_collision"] or sme().get_simple_collision_count(mesh) > 0:
+        if not m["require_collision"] or collision_prims(mesh) > 0:
             return []
         if m["allow_complex_as_simple"] and \
                 sme().get_collision_complexity(mesh) == unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE:
@@ -80,7 +85,7 @@ class CollisionCheck(MeshCheck):
 
     def fix(self, issue, mesh, cfg):
         shape = getattr(unreal.ScriptCollisionShapeType, issue.fix_data["shape"].upper())
-        return sme().add_simple_collisions(mesh, shape) >= 0 and sme().get_simple_collision_count(mesh) > 0
+        return sme().add_simple_collisions(mesh, shape) >= 0 and collision_prims(mesh) > 0
 
     def snapshot(self, mesh):
         return {}  # the fix only runs when there was no simple collision
