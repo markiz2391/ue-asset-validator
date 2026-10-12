@@ -32,27 +32,52 @@ av.runner.revert_last()
 
 ## Checks
 
-| Id | What | Fix |
-|----|------|-----|
-| `naming.prefix` | Prefix by class (`SM_`, `T_`, `MI_`…) | rename (confirm) |
-| `naming.chars` | Allowed characters, max length | – |
-| `naming.texture_suffix` | Texture has a known suffix | – |
-| `path.folder` | Class lives under an allowed folder | – |
-| `tex.pow2` | Power-of-two size | – |
-| `tex.max_size` | Max resolution per suffix | max texture size |
-| `tex.compression` | Compression per suffix | set |
-| `tex.srgb` | sRGB per suffix | set |
-| `tex.group` | Texture group per suffix (optional) | set |
-| `mesh.nanite` | Nanite above N triangles / off for exceptions | toggle |
-| `mesh.lods` | LOD count for non-Nanite meshes | – |
-| `mesh.collision` | Simple collision present | add box/convex |
-| `mesh.lightmap_uv` | Valid lightmap UV index (baked lighting only) | set index |
-| `mesh.bounds` | Size limits, pivot far outside bounds | – |
-| `mesh.texel_density` | px/m vs target ± tolerance | – |
-| `mat.budget` | Pixel instructions / samplers | – |
-| `mat.master_folder` | Masters only in allowed roots | – |
-| `mat.mi_parent` | MI master is approved | – |
-| `mat.direct_master` | Mesh slots use MIs, not masters | – |
+Values below are the defaults from `Config/AssetValidator/rules.json`.
+
+### Naming
+- **Prefix by class** (`naming.prefix`): StaticMesh `SM_`, SkeletalMesh `SK_`, Texture2D `T_`, Material `M_`, Material Instance `MI_`, Material Function `MF_`, Blueprint `BP_`, Niagara System `NS_`. *Fix: rename (with confirmation, not undoable). A wrong known prefix is replaced, so `M_` on an MI becomes `MI_`.*
+- **Allowed characters** (`naming.chars`): letters, digits and `_` only. No spaces or special characters.
+- **Name length** (`naming.chars`): 64 characters max.
+- **Texture suffix** (`naming.texture_suffix`): the texture ends with a known suffix (`_D`, `_BC`, `_N`, `_ORM`, `_M`, `_E`, `_H`).
+- **Folder** (`path.folder`): static meshes live under a folder named `Meshes`, textures under `Textures`.
+
+### Textures
+Rules per suffix. These read Asset Registry tags only, so nothing gets loaded and the pass is fast.
+
+| Suffix | Compression | sRGB | Max size |
+|---|---|---|---|
+| `_D`, `_BC` | Default | on | 4096 |
+| `_N` | Normalmap | off | 4096 |
+| `_ORM`, `_M` | Masks | off | 2048 |
+| `_E` | Default | on | 1024 |
+| `_H` | Grayscale | off | 2048 |
+
+- **Power of two** (`tex.pow2`): width and height are powers of two.
+- **Max size** (`tex.max_size`): effective size is within the suffix limit. *Fix: sets Max Texture Size.*
+- **Compression** (`tex.compression`): matches the suffix. *Fix: sets it.*
+- **sRGB** (`tex.srgb`): matches the suffix. *Fix: sets it.*
+- **Texture group** (`tex.group`): matches the suffix. Optional, only when `texture_group` is set for a suffix. *Fix: sets it.*
+
+### Meshes
+- **Nanite** (`mesh.nanite`): flags meshes over 5000 triangles with Nanite off, and meshes listed in `nanite_exceptions` with Nanite on. *Fix: toggles Nanite.*
+- **LODs** (`mesh.lods`): non-Nanite meshes need at least 3 LODs.
+- **Collision** (`mesh.collision`): simple collision is present (Use Complex as Simple is allowed). *Fix: adds box collision.*
+- **Lightmap UV** (`mesh.lightmap_uv`): valid lightmap UV index, not channel 0. Only runs when `use_baked_lighting` is true. *Fix: sets it to the last UV channel.*
+- **Size** (`mesh.bounds`): largest side between 1 cm and 50,000 cm. Catches cm/m scale mistakes.
+- **Pivot** (`mesh.bounds`): pivot no more than 100 cm outside the mesh bounds.
+
+### Materials
+Report only.
+- **Instruction budget** (`mat.budget`): 300 pixel shader instructions max (Materials and MIs).
+- **Sampler budget** (`mat.budget`): 12 samplers max.
+- **Master folder** (`mat.master_folder`): master Materials live under `/Game/Materials/Masters`.
+- **Approved master** (`mat.mi_parent`): the MI's root master is in the approved list. Edit the list in the box on the Materials tab; it is saved to `rules.json`.
+- **No masters on meshes** (`mat.direct_master`): static mesh slots use an MI, never a master Material directly. Engine materials are ignored.
+
+### Texel Density
+Report only.
+- **Texel density** (`mesh.texel_density`): `sqrt(UV0 area / surface area) × texture resolution` in px/m, computed from LOD0 and the largest texture in the slot-0 material. Must be within ±25% of the target (512 by default, or the value typed into the tab's field).
+- A mesh is skipped (Info) when slot 0 has no texture, the mesh can't be read, or UV0 is invalid.
 
 Materials and texel density are report-only on purpose. Those calls stay with a human.
 
