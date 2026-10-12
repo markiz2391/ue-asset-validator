@@ -1,0 +1,93 @@
+{
+  "prefixes": {
+    "StaticMesh": "SM_",
+    "SkeletalMesh": "SK_",
+    "Texture2D": "T_",
+    "Material": "M_",
+    "MaterialInstanceConstant": "MI_",
+    "MaterialFunction": "MF_",
+    "Blueprint": "BP_",
+    "NiagaraSystem": "NS_"
+  },
+  "naming": {
+    "allowed_chars": "^[A-Za-z0-9_]+$",
+    "max_length": 64
+  },
+  "folders": {
+    "StaticMesh": [
+      "Meshes"
+    ],
+    "Texture2D": [
+      "Textures"
+    ]
+  },
+  "texture_suffixes": {
+    "_D": {
+      "compression": "TC_DEFAULT",
+      "srgb": true,
+      "max_size": 4096
+    },
+    "_BC": {
+      "compression": "TC_DEFAULT",
+      "srgb": true,
+      "max_size": 4096
+    },
+    "_N": {
+      "compression": "TC_NORMALMAP",
+      "srgb": false,
+      "max_size": 4096
+    },
+    "_ORM": {
+      "compression": "TC_MASKS",
+      "srgb": false,
+      "max_size": 2048
+    },
+    "_M": {
+      "compression": "TC_MASKS",
+      "srgb": false,
+      "max_size": 2048
+    },
+    "_E": {
+      "compression": "TC_DEFAULT",
+      "srgb": true,
+      "max_size": 1024
+    },
+    "_H": {
+      "compression": "TC_GRAYSCALE",
+      "srgb": false,
+      "max_size": 2048
+    }
+  },
+  "meshes": {
+    "nanite_min_triangles": 5000,
+    "nanite_exceptions": [],
+    "min_lods_non_nanite": 3,
+    "require_collision": true,
+    "allow_complex_as_simple": true,
+    "collision_fix_shape": "BOX",
+    "use_baked_lighting": false,
+    "min_bounds_cm": 1.0,
+    "max_bounds_cm": 50000,
+    "max_pivot_offset_cm": 100
+  },
+  "materials": {
+    "max_pixel_instructions": 300,
+    "max_samplers": 12,
+    "master_roots": [
+      "/Game/Materials/Masters"
+    ],
+    "approved_masters": [
+      "/Game/Materials/Masters/M_Rock_Master",
+      "/Game/Fab/Materials/Standard/M_MS_Base",
+      "/Game/Fab/Materials/Standard/M_MS_Decal"
+    ]
+  },
+  "texel_density": {
+    "target_px_per_m": 512,
+    "tolerance": 0.25
+  },
+  "ignore_paths": [
+    "/Game/Developers",
+    "/Game/_Test"
+  ]
+}
